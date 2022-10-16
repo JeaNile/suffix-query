@@ -1,0 +1,8 @@
+.idea
+*.DS_Store
+/vendor
+composer.lock
+.php_cs.cache
+.github
+.php-cs-fixer.php
+phpstan.neon
