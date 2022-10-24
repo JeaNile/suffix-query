@@ -9,20 +9,24 @@ use Hyperf\Database\Model\Events\Event;
 use Hyperf\Database\Model\Events\Saved;
 use Hyperf\Event\Annotation\Listener;
 use Hyperf\Event\Contract\ListenerInterface;
+use Hyperf\Utils\Codec\Json;
+use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 
 /**
  * @Listener
  */
 class DataMappingListener implements ListenerInterface
 {
-    // private StdoutLoggerInterface $logger;
+    /**
+     * @var LoggerInterface
+     */
+    private $logger;
 
-
-    // public function __construct(
-    //     StdoutLoggerInterface $logger,
-    // ) {
-    //     $this->logger = $logger;
-    // }
+    public function __construct(ContainerInterface $container)
+    {
+        $this->logger = $container->get(StdoutLoggerInterface::class);
+    }
 
     public function listen(): array
     {
@@ -39,6 +43,7 @@ class DataMappingListener implements ListenerInterface
             foreach ($model->getMappingColumns() as $mappingColumn) {
                 $orders[] = $model->getAttribute($mappingColumn);
             }
+            $this->logger->info(sprintf("data mapping:%s", Json::encode($orders)));
             $orders && $model->save($orders);
         }
     }
