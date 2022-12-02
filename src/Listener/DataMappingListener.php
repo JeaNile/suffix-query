@@ -30,8 +30,10 @@ class DataMappingListener implements ListenerInterface
 
     public function listen(): array
     {
+        // TODO 此处自定义创建和更新事件继承 Created 和 Updated，后续根据业务需要继承，业务自行实现
         return [
-            Saved::class,
+            DataMappingCreated::class,
+            DataMappingUpdated::class,
         ];
     }
 
@@ -40,9 +42,11 @@ class DataMappingListener implements ListenerInterface
         if ($event instanceof Event) {
             $model = $event->getModel();
             $orders = [];
+            // 业务事件继承后，自行传递需要映射的字段，此处只对映射数据做处理，不做业务逻辑
             foreach ($model->getMappingColumns() as $mappingColumn) {
                 $orders[] = $model->getAttribute($mappingColumn);
             }
+            // TODO 考虑是否抽象不同驱动
             $this->logger->info(sprintf("data mapping:%s", Json::encode($orders)));
             $orders && $model->save($orders);
         }
