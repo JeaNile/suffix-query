@@ -6,7 +6,7 @@ namespace Jeanile\SuffixQuery\Event;
 
 use Hyperf\Database\Model\Model;
 
-class DataMappingCreated
+class ReverseMappingCreated
 {
     public Model $model;
 

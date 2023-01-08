@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Jeanile\SuffixQuery\Command;
 
-use App\Model\Model;
 use Carbon\Carbon;
 use Hyperf\Command\Annotation\Command;
 use Hyperf\Command\Command as HyperfCommand;
+use Hyperf\Database\Model\Model;
 use Hyperf\DbConnection\Db;
 use Hyperf\Di\Annotation\Inject;
 use Hyperf\Redis\Redis;
@@ -17,8 +17,7 @@ use Psr\Container\ContainerInterface;
 /**
  * @Command
  */
-#[Command]
-class DataMappingCommand extends HyperfCommand
+class ReverseMappingCommand extends HyperfCommand
 {
     protected ContainerInterface $container;
 
@@ -48,7 +47,7 @@ class DataMappingCommand extends HyperfCommand
                 $key = sprintf('mapping:%s', $model);
                 /** @var Model $modelInstance */
                 $modelInstance = new $model();
-                $startTime = Carbon::now()->subYear()->toDateTimeString();
+                $startTime = Carbon::now()->subMonth()->toDateTimeString();
                 $endTime = Carbon::now()->toDateTimeString();
                 $modelInstance
                     ->query()
@@ -56,19 +55,32 @@ class DataMappingCommand extends HyperfCommand
                     ->whereBetween('created_at', [$startTime, $endTime])
                     ->chunkById(100, function ($items) use ($redis, $key) {
                         Db::transaction(function () use ($items) {
-                            $orders = [];
+                            $mappings = [];
                             foreach ($items as $item) {
                                 foreach ($item->getMappingColumns() ?? [] as $column) {
+                                    // 过滤指定历史数据
+                                    $data = $item->getOriginal($column);
+
+                                    if (in_array($data, $this->getFilterData())) {
+                                        continue;
+                                    }
+
                                     /* @var Model $item */
-                                    $orders[] = $item->getOriginal($column);
+                                    $mappings[] = $data;
                                 }
                             }
-                            // $orders && $this->orderMappingService->batchInsert($orders);
+
+                            $mappings && $this->orderMappingService->batchInsert($mappings);
                         });
                         $redis->set($key, $items->last()->id, ['ex' => 86400]);
                     });
             });
         }
+    }
+
+    public function getFilterData(): array
+    {
+        return [];
     }
 
     public function needMappingModel(): array
