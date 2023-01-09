@@ -18,17 +18,10 @@ class ReverseMappingServer
     public function get(string $reverseData, int $limit = 20)
     {
         return ReverseMapping::query()
-            // ->where('reverse_data', 'like', sprintf('%s%%', strrev($reverseOrderNo)))
-            ->where('reverse_data', $reverseData)
+            ->where('reverse_data', 'like', sprintf('%s%%', strrev($reverseData)))
             ->limit($limit)
             ->orderBy('id', 'desc')
             ->get();
-
-        // if ($reverseMappings->isNotEmpty()) {
-        //     $requestData[$field] = implode(',', array_column($reverseMappings->toArray(), 'original_data'));
-        //     // 覆盖 request
-        //     Context::set('http.request.parsedData', $requestData);
-        // }
     }
 
     public function getOriginalData(array $data, $isUniq = false): array

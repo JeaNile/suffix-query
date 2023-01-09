@@ -13,7 +13,6 @@ use Hyperf\Di\Aop\ProceedingJoinPoint;
 use Jeanile\SuffixQuery\Annotation\SuffixQuery;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\HttpServer\Contract\RequestInterface;
-use Jeanile\SuffixQuery\Model\ReverseMapping;
 use Jeanile\SuffixQuery\ReverseMappingServer;
 
 
@@ -36,7 +35,6 @@ class SuffixQueryAspect extends AbstractAspect
      */
     protected RequestInterface $request;
 
-
     /**
      * @Inject
      */
@@ -48,24 +46,29 @@ class SuffixQueryAspect extends AbstractAspect
         $annotation = $proceedingJoinPoint->getAnnotationMetadata()->method[SuffixQuery::class];
 
         $fields = explode(',', $annotation->fields);
-        $requestData = $this->request->all();
 
-        foreach ($fields as $field) {
-            if (empty($field)) {
-                break;
-            }
+        if (count($fields)) {
+            $requestData = $this->request->all();
 
-            // 查询是否存在映射
-            $reverseMappings = $this->reverseMappingServer->get($field, $annotation->limit);
+            foreach ($fields as $field) {
+                if (empty($requestData[$field])) {
+                    break;
+                }
 
-            // 存在重新覆盖 request
-            if ($reverseMappings->isNotEmpty()) {
-                $requestData[$field] = implode(',', array_column($reverseMappings->toArray(), 'original_data'));
-                // 覆盖 request
-                Context::set('http.request.parsedData', $requestData);
+                // 查询是否存在映射
+                $reverseMappings = $this->reverseMappingServer->get($requestData[$field], $annotation->limit);
+
+                // 存在重新覆盖 request
+                if ($reverseMappings->isNotEmpty()) {
+                    $requestData[$field] = implode(',', array_column($reverseMappings->toArray(), 'original_data'));
+                    // 覆盖 request
+                    Context::set('http.request.parsedData', $requestData);
+                }
             }
         }
+
         return $proceedingJoinPoint->process();
     }
+
 
 }
