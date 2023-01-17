@@ -13,6 +13,7 @@ namespace Jeanile\SuffixQuery;
 
 use Hyperf\HttpMessage\Server\Request\Parser;
 use Hyperf\HttpMessage\Server\RequestParserInterface;
+use Jeanile\SuffixQuery\Listener\ReverseMappingListener;
 
 class ConfigProvider
 {
@@ -29,6 +30,9 @@ class ConfigProvider
                 ],
                 'class_map' => [
                 ],
+            ],
+            'listeners' => [
+                ReverseMappingListener::class,
             ],
         ];
     }
