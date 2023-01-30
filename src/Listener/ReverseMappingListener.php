@@ -10,6 +10,7 @@ use Hyperf\Event\Contract\ListenerInterface;
 use Hyperf\Utils\Codec\Json;
 use Jeanile\SuffixQuery\Event\ReverseMappingCreated;
 use Jeanile\SuffixQuery\Event\ReverseMappingUpdated;
+use Jeanile\SuffixQuery\ReverseMappingServer;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -19,15 +20,16 @@ use Psr\Log\LoggerInterface;
 class ReverseMappingListener implements ListenerInterface
 {
     private LoggerInterface $logger;
+    private ReverseMappingServer $reverseMappingServer;
 
     public function __construct(ContainerInterface $container)
     {
         $this->logger = $container->get(StdoutLoggerInterface::class);
+        $this->reverseMappingServer = $container->get(ReverseMappingServer::class);
     }
 
     public function listen(): array
     {
-        // TODO 此处自定义创建和更新事件继承 Created 和 Updated，后续根据业务需要继承，业务自行实现
         return [
             ReverseMappingCreated::class,
             ReverseMappingUpdated::class,
@@ -50,7 +52,7 @@ class ReverseMappingListener implements ListenerInterface
 
             $this->logger->info(sprintf("reverse mapping:%s", Json::encode($data)));
 
-            $data && $model->save($data);
+            $data && $this->reverseMappingServer->batchInsert($data);
         }
     }
 
