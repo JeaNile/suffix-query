@@ -5,7 +5,7 @@
 
 ## 安装
 
-```bash
+```shell
 $ composer require "jeanile/suffix-query"
 ```
 
@@ -15,6 +15,12 @@ $ composer require "jeanile/suffix-query"
 * Swoole 4.4LTS+
 * Redis 3.2+
 * Hyperf 2.2+
+
+### 执行迁移
+
+```shell
+$ php bin/hyperf.php migrate --path=./vendor/jeanile/suffix-query/migrations/2022_09_27_144249_create_reverse_mapping_table.php
+```
 
 ### 模型
 
