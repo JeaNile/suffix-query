@@ -39,28 +39,28 @@ class ReverseMappingServer
             ->toArray();
     }
 
-    public function batchInsert(array $orders): bool
+    public function batchInsert(array $pendingMappedData): bool
     {
-        $orders = array_unique(array_filter($orders));
+        $pendingMappedData = array_unique(array_filter($pendingMappedData));
         // 过滤表中已存在的订单号
-        if ($orderMappings = $this->getOriginalData($orders)) {
-            $orders = array_diff($orders, $orderMappings);
+        if ($existOriginalData = $this->getOriginalData($pendingMappedData)) {
+            $pendingMappedData = array_diff($pendingMappedData, $existOriginalData);
         }
 
         $insertData = [];
         $now = new Carbon();
-        foreach ($orders as $order) {
+        foreach ($pendingMappedData as $item) {
 
-            $redisKey = 'reverse_mapping:' . $order;
+            $redisKey = 'reverse_mapping:' . $item;
             // 判断如果存在 redis 中则不需要再次插入
             if (! $this->redis->set($redisKey, '1', ['NX', 'EX' => 5])) {
-                $this->logger->warning(sprintf('订单映射重复:%s', $order));
+                $this->logger->warning(sprintf('订单映射重复:%s', $item));
                 continue;
             }
 
             $insertData[] = [
-                'original_data' => $order,
-                'reverse_data' => strrev($order),
+                'original_data' => $item,
+                'reverse_data' => strrev($item),
                 'created_at' => $now->toDateTimeString(),
                 'updated_at' => $now->toDateTimeString(),
             ];

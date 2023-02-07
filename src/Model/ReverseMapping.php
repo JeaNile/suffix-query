@@ -8,8 +8,8 @@ use Hyperf\DbConnection\Model\Model;
 
 /**
  * @property int $id
- * @property string $order_no
- * @property string $reverse_order_no
+ * @property string $original_data
+ * @property string $reverse_data
  * @property \Carbon\Carbon $created_at
  * @property \Carbon\Carbon $updated_at
  */

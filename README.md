@@ -127,7 +127,7 @@ class PurchaseOrderController extends AbstractController
     /**
      * 列表接口.
      * @GetMapping(path="list")
-     * @SuffixQuery(fields="order")
+     * @SuffixQuery(fields="order_no")
      */
     public function list(array $data): array
     {
