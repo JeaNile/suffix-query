@@ -17,7 +17,10 @@ class CreateReverseMappingTable extends Migration
             $table->bigIncrements('id');
             $table->string('original_data', 255)->nullable(false)->comment('原始数据');
             $table->string('reverse_data', 255)->nullable(false)->comment('逆序数据');
+
+            $table->unique(['reverse_order_no', 'order_no'], 'udx_order_no');
             $table->rawIndex('original_data(5)', 'idx_original_data');
+
             $table->comment('逆序映射表');
             $table->timestamps();
         });
